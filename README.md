@@ -9,7 +9,7 @@
 To install `py_nessus_pro`, simply run:
 
 ```
-pip install py_nessus_pro
+pip install py-nessus-pro
 ```
 
 ## Usage
