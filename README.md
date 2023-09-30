@@ -77,4 +77,4 @@ For more information on the available methods and their parameters, please refer
 
 ## License
 
-`py_nessus_pro` is licensed under the MIT License. See the `LICENSE` file for more information.
+`py_nessus_pro` is licensed under the GNU GENERAL PUBLIC LICENSE Version 2. See the `LICENSE` file for more information.
