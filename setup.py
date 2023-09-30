@@ -10,8 +10,8 @@ setup(
         'slugify',
     ],
     author='Matbe34',
-    description='Python library for Nessus Professional that provides an nterface to interactuate with the API allowing to create, launch and manage scans.',
-    long_description=open('README.md').read(),
+    description='Python library for managing Nessus Professional.',
+    long_description='Python library for managing Nessus Professional that provides an interface to interactuate with the API allowing to create, launch, monitor and manage scans.',
     url='https://github.com/Matbe34/py_nessus',
     classifiers=['Programming Language :: Python :: 3']
 )
