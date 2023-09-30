@@ -1,4 +1,5 @@
-import json, requests
+import json, requests, re
+from datetime import datetime
 from selenium import webdriver
 from bs4 import BeautifulSoup
 
@@ -140,3 +141,64 @@ class PyNessus:
 
     def get_scan_reports(self, scan_id, path = ""):
         return self.scans[scan_id].get_reports()
+    
+    def get_status_by_name(self, name):
+        res = []
+        ids = self.search_scans(name)
+        for id in ids:
+            res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
+        return res
+    
+    def get_reports_by_name(self, name, path = ""):
+        res = []
+        for scan in self.scans:
+            if name.lower() in scan.get_name().lower():
+                res.append({"name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
+        return res
+    
+    def get_scans_before(self, before):
+        res = []
+        ids = self.search_scans(before = before)
+        for id in ids:
+            res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
+        return res
+    
+    def get_scans_after(self, after):
+        res = []
+        ids = self.search_scans(after = after)
+        for id in ids:
+            res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
+        return res
+    
+    def search_scans(self, name = "", after = "", before = ""):
+        results = []
+        for i, scan in enumerate(self.scans):
+            if name:
+                name = re.sub(r'(?<!\.)\*', '.*', name)
+                if re.compile(name, re.IGNORECASE).search(scan.get_name()):
+                    if after:
+                        after_millis = datetime.strptime(after, "%Y-%m-%d_%H:%M:%S").timestamp()
+                        if after_millis < scan.get_status()["scan_start"]:
+                            if before:
+                                before_millis = datetime.strptime(before, "%Y-%m-%d_%H:%M:%S").timestamp()
+                                if before_millis > scan.get_status()["scan_start"]:
+                                    results.append(i)
+                            else:
+                                results.append(i)
+                    else:
+                        results.append(i)
+            elif after:
+                after_millis = datetime.strptime(after, "%Y-%m-%d_%H:%M:%S").timestamp()
+                if after_millis < scan.get_status()["scan_start"]:
+                    if before:
+                        before_millis = datetime.strptime(before, "%Y-%m-%d_%H:%M:%S").timestamp()
+                        if before_millis > scan.get_status()["scan_start"]:
+                            results.append(i)
+                    else:
+                        results.append(i)  
+            elif before:
+                before_millis = datetime.strptime(before, "%Y-%m-%d_%H:%M:%S").timestamp()
+                if before_millis > scan.get_status()["scan_start"]:
+                    results.append(i)                 
+
+        return results
