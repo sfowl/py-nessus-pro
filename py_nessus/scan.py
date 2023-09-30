@@ -125,9 +125,12 @@ class _Scan():
     def get_status(self):
         if self.id:
             x = json.loads(requests.get(f"{self.nessus_server}/scans/{self.id}", headers=self.headers, verify=False).text)
-            start = str(x["info"]["scan_start"]) if x["info"]["scan_start"] else "Not started"
-            end = str(x["info"]["scan_end"]) if x["info"]["scan_end"] else "Not finished"
-            return " ".join([x["info"]["status"], start, end])
+            res = {}
+            res["status"] = x["info"]["status"]
+            res["scan_start"] = x["info"]["scan_start"]
+            res["scan_end"] = x["info"]["scan_end"] if res["status"] == "completed" else None 
+            res["name"] = x["info"]["name"]
+            return res
         else:
             return "Scan not posted yet"
     
@@ -152,7 +155,7 @@ class _Scan():
         if not self.id:
             log.error("Scan not posted yet")
             return
-        if "completed" not in self.get_status():
+        if self.get_status()["status"] != "completed":
             log.error("Scan not completed yet")
             return
         if not path:
