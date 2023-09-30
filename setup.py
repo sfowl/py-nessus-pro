@@ -13,7 +13,6 @@ setup(
     description='Python library for managing Nessus Professional.',
     url='https://github.com/Matbe34/py-nessus-pro',
     classifiers=['Programming Language :: Python :: 3'],
-    long_description_content_type='text/markdown',
     long_description="""PyNessusPro
 ===========
 
@@ -30,12 +29,12 @@ Installation
 
 To install ``py_nessus_pro``\, simply run:
 
-::
+.. code:: 
 
    pip install py-nessus-pro
 
 Usage
------
+------------
 
 To use ``py_nessus_pro``\, you first need to create an instance of the
 ``PyNessusPro`` class, which represents a connection to a Nessus server.
