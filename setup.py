@@ -13,13 +13,7 @@ setup(
     description='Python library for managing Nessus Professional.',
     url='https://github.com/Matbe34/py-nessus-pro',
     classifiers=['Programming Language :: Python :: 3'],
-    long_description="""PyNessusPro
-===========
-
-A is a Python module that provides a high-level
-interface for interacting with a Nessus vulnerability scanner. It provides Nessus Professional
-with an interface to expand the read-omly API and be able to launch
-scans and modify them.
+    long_description="""A Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
 
 Usage
 ------------
