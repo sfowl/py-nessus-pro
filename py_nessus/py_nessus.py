@@ -153,21 +153,21 @@ class PyNessus:
         res = []
         for scan in self.scans:
             if name.lower() in scan.get_name().lower():
-                res.append({"name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
+                res.append({"id": id, "name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
         return res
     
     def get_scans_before(self, before):
         res = []
         ids = self.search_scans(before = before)
         for id in ids:
-            res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
+            res.append({"id": id, "name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
     def get_scans_after(self, after):
         res = []
         ids = self.search_scans(after = after)
         for id in ids:
-            res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
+            res.append({"id": id, "name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
     def search_scans(self, name = "", after = "", before = ""):
