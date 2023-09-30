@@ -28,7 +28,7 @@ scans and modify them.
 Installation
 ------------
 
-To install ``py_nessus_pro``, simply run:
+To install ``py_nessus_pro``\, simply run:
 
 ::
 
@@ -37,7 +37,7 @@ To install ``py_nessus_pro``, simply run:
 Usage
 -----
 
-To use ``py_nessus_pro``, you first need to create an instance of the
+To use ``py_nessus_pro``\, you first need to create an instance of the
 ``PyNessusPro`` class, which represents a connection to a Nessus server.
 You can create an instance by providing the URL of the Nessus server, as
 well as your username and password:
