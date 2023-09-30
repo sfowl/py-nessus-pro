@@ -1,6 +1,6 @@
 [![Upload Python Package](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release)](https://github.com/Matbe34/py-nessus-pro/actions/workflows/pynessus-publish.yml)
 
-# Py_Nessus
+# PyNessusPro
 
 `py_nessus_pro` is a Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. The module uses the Nessus REST API to perform various operations, such as creating and managing scans, retrieving scan metadata and reports, and searching for scans by name or date. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
 
