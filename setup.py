@@ -16,7 +16,7 @@ setup(
     long_description="""PyNessusPro
 ===========
 
-``py_nessus_pro`` is a Python module that provides a high-level
+A is a Python module that provides a high-level
 interface for interacting with a Nessus vulnerability scanner. It provides Nessus Professional
 with an interface to expand the read-omly API and be able to launch
 scans and modify them.
@@ -44,5 +44,14 @@ Launch a scan:
    scan_folder = "Automatic Scan Test"
 
    scan_index = nessus.new_scan(name=scan_name, target=scan_target, folder=scan_folder)
+
+License
+-------
+
+``py_nessus_pro`` is licensed under the GNU GENERAL PUBLIC LICENSE
+Version 2. See the ``LICENSE`` file for more information.
+
+.. |Upload Python Package| image:: https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release
+   :target: https://github.com/Matbe34/py-nessus-pro/actions/workflows/pynessus-publish.yml
 """
 )
