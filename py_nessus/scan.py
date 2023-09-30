@@ -127,8 +127,8 @@ class _Scan():
             x = json.loads(requests.get(f"{self.nessus_server}/scans/{self.id}", headers=self.headers, verify=False).text)
             res = {}
             res["status"] = x["info"]["status"]
-            res["scan_start"] = datetime.utcfromtimestamp(x["info"]["scan_start"]).strftime('%Y-%m-%d_%H:%M:%S') if res["status"] != "empty" else None
-            res["scan_end"] = datetime.utcfromtimestamp(x["info"]["scan_end"]).strftime('%Y-%m-%d_%H:%M:%S') if res["status"] == "completed" else None 
+            res["scan_start"] = x["info"]["scan_start"] if res["status"] != "empty" else None
+            res["scan_end"] = x["info"]["scan_end"] if res["status"] == "completed" else None 
             res["name"] = x["info"]["name"]
             return res
         else:
@@ -197,4 +197,4 @@ class _Scan():
                 raise Exception("[!] Error exporting scan: " + res["error"])
         
         log.success("Reports exported to " + path)
-
+        return path
