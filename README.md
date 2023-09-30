@@ -1,23 +1,23 @@
-[![Upload Python Package](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release)](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml)
+[![Upload Python Package](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release)](https://github.com/Matbe34/py-nessus-pro/actions/workflows/pynessus-publish.yml)
 
 # Py_Nessus
 
-`py_nessus` is a Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. The module uses the Nessus REST API to perform various operations, such as creating and managing scans, retrieving scan metadata and reports, and searching for scans by name or date. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
+`py_nessus_pro` is a Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. The module uses the Nessus REST API to perform various operations, such as creating and managing scans, retrieving scan metadata and reports, and searching for scans by name or date. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
 
 ## Installation
 
-To install `py_nessus`, simply run:
+To install `py_nessus_pro`, simply run:
 
 ```
-pip install py_nessus
+pip install py_nessus_pro
 ```
 
 ## Usage
 
-To use `py_nessus`, you first need to create an instance of the `PyNessus` class, which represents a connection to a Nessus server. You can create an instance by providing the URL of the Nessus server, as well as your username and password:
+To use `py_nessus_pro`, you first need to create an instance of the `PyNessusPro` class, which represents a connection to a Nessus server. You can create an instance by providing the URL of the Nessus server, as well as your username and password:
 
 ```python
-from py_nessus import PyNessus
+from py_nessus_pro import PyNessusPro
 
 nessus_server = "https://nessus-server-url:8834"
 username = "admin"
@@ -26,7 +26,7 @@ password = "password"
 nessus = PyNessus(nessus_server, username, password)
 ```
 
-Once you have created an instance of the `PyNessus` class, you can use its methods to perform various operations. For example, you can create a new scan by calling the `new_scan` method:
+Once you have created an instance of the `PyNessusPro` class, you can use its methods to perform various operations. For example, you can create a new scan by calling the `new_scan` method:
 
 ```python
 scan_name = "My Scan"
@@ -77,4 +77,4 @@ For more information on the available methods and their parameters, please refer
 
 ## License
 
-`py_nessus` is licensed under the MIT License. See the `LICENSE` file for more information.
+`py_nessus_pro` is licensed under the MIT License. See the `LICENSE` file for more information.

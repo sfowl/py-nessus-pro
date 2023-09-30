@@ -4,12 +4,12 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 
 from .logger import logger as log
-from py_nessus.scan import _Scan
+from py_nessus_pro.scan import _Scan
 
 # file deepcode ignore SSLVerificationBypass: Nessus self-signed certificate
 requests.packages.urllib3.disable_warnings() 
 
-class PyNessus:
+class PyNessusPro:
     
     nessus_server = ""
     headers = {}
