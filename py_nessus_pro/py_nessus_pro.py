@@ -48,9 +48,12 @@ class PyNessusPro:
             driver.quit()
             
             r = requests.post(f"{self.nessus_server}/session", headers=self.headers, data=f'{{"username":"{username}","password":"{password}"}}', verify=False)
-            self.headers["X-Cookie"] = "token=" + json.loads(r.text)["token"]
-            self.headers["X-API-Token"] = token
-            log.info("Successfully logged in")
+            if r.status_code == 200:
+                self.headers["X-Cookie"] = "token=" + json.loads(r.text)["token"]
+                self.headers["X-API-Token"] = token
+                log.info("Successfully logged in")
+            else:
+                raise Exception("[!] Login failed")
         
         if len(self.folder_map) == 0:
             folders = json.loads(requests.get(f"{self.nessus_server}/folders", headers=self.headers, verify=False).text)
@@ -76,7 +79,7 @@ class PyNessusPro:
                     self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder_id = scan["folder_id"]))
 
     def new_scan(self, name = "", target = "", folder = 0):
-        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, target = target, folder_id = folder))
+        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, target = target, folder = folder))
         log.info("Created new scan")
         return len(self.scans) - 1
     
@@ -134,10 +137,6 @@ class PyNessusPro:
         for scan in self.scans:
             scans.append(scan.dump())
         return scans
-    
-    def load_scans(self, scans):
-        for scan in scans:
-            self.scans.append(_Scan(self.nessus_server, self.headers, scan["id"], scan["config"], self.folder_map, self.policy_map))
 
     def get_scan_reports(self, scan_id, path = ""):
         return self.scans[scan_id].get_reports()
@@ -151,9 +150,9 @@ class PyNessusPro:
     
     def get_reports_by_name(self, name, path = ""):
         res = []
-        for scan in self.scans:
-            if name.lower() in scan.get_name().lower():
-                res.append({"id": id, "name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
+        ids = self.search_scans(name)
+        for id in ids:
+            res.append({"id": id, "name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
         return res
     
     def get_scans_before(self, before):
@@ -202,3 +201,17 @@ class PyNessusPro:
                     results.append(i)                 
 
         return results
+    
+    def create_folder(self, folder_name):
+        if folder_name in self.folder_map:
+            log.warn("Folder already exists")
+            return self.folder_map[folder_name]
+        else:
+            r = requests.post(f"{self.nessus_server}/folders", headers=self.headers, data=f'{{"name":"{folder_name}"}}', verify=False)
+            if r.status_code == 200:
+                self.folder_map[folder_name] = json.loads(r.text)["id"]
+                log.success("Folder created")
+                return self.folder_map[folder_name]
+            else:
+                raise Exception("[!] Folder creation failed")
+

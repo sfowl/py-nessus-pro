@@ -2,12 +2,20 @@ from setuptools import setup, find_packages
 
 setup(
     name='py_nessus_pro',
-    version='0.8.1',
+    version='0.8.3',
     packages=find_packages(),
     install_requires=[
         'selenium',
         'beautifulsoup4',
         'slugify',
+        'tempfile',
+         'requests',
+         'json',
+         'datetime',
+         'random',
+         'urllib',
+         'ssl',
+         'logger',
     ],
     author='Matbe34',
     description='Python library for managing Nessus Professional.',
