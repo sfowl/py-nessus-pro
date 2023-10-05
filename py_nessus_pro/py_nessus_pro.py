@@ -76,7 +76,8 @@ class PyNessusPro:
             scans_list = json.loads(requests.get(f"{self.nessus_server}/scans", headers=self.headers, verify=False).text)
             for scan in scans_list["scans"]:
                 if scan["folder_id"] != 2:
-                    self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder_id = scan["folder_id"]))
+                    folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
+                    self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
 
     def new_scan(self, name = "", target = "", folder = 0):
         self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, target = target, folder = folder))
