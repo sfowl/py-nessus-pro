@@ -1,6 +1,6 @@
 import logging
 
-LOG_LEVEL = logging.INFO
+LOG_LEVEL = logging.WARNING
 
 class ColoredFormatter(logging.Formatter):
     COLORS = {
