@@ -1,4 +1,4 @@
-import json, requests, tempfile, random, string, urllib.request, ssl
+import json, requests, random, string, urllib.request, ssl
 from slugify import slugify
 from datetime import datetime
 from time import sleep
@@ -151,27 +151,31 @@ class _Scan():
             "metadata":self.metadata,
         }
 
-    def get_reports(self, path = ""):
+    def get_reports(self, path):
         if not self.id:
             log.error("Scan not posted yet")
             return
         if self.get_status()["status"] != "completed":
             log.error("Scan not completed yet")
             return
-        if not path:
-            # create random directory in /tmp
-            path = tempfile.mkdtemp(prefix = f"nessus_{slugify(self.metadata['settings']['name'])}_")
 
         for t in self.export_types:
-            data = json.loads('{"format":"csv","template_id":"16","reportContents":{"csvColumns":{"id":true,"cve":true,"cvss":true,"risk":true,"hostname":true,"protocol":true,"port":true,"plugin_name":true,"synopsis":true,"description":true,"solution":true,"see_also":true,"plugin_output":true,"stig_severity":true,"cvss3_base_score":true,"cvss_temporal_score":true,"cvss3_temporal_score":true,"vpr_score":true,"risk_factor":true,"references":true,"plugin_information":true,"exploitable_with":true}},"extraFilters":{"host_ids":[],"plugin_ids":[]}}')
+            data = json.loads('{"format":"csv","reportContents":{"csvColumns":{"id":true,"cve":true,"cvss":true,"risk":true,"hostname":true,"protocol":true,"port":true,"plugin_name":true,"synopsis":true,"description":true,"solution":true,"see_also":true,"plugin_output":true,"stig_severity":true,"cvss3_base_score":true,"cvss_temporal_score":true,"cvss3_temporal_score":true,"vpr_score":true,"risk_factor":true,"references":true,"plugin_information":true,"exploitable_with":true}},"extraFilters":{"host_ids":[],"plugin_ids":[]}}')
             data["format"] = t
+
+            if t in ["html", "pdf"]:
+                data = json.loads('{"format":"html", "chapters": "vuln_by_host;compliance_exec;remediations;"}')                
 
             res = json.loads(requests.post(f"{self.nessus_server}/scans/{self.id}/export", headers=self.headers, json = data, verify=False).text)
             if "token" in res:
                 log.debug("Export in progress: " + res["token"])
                 status = json.loads(requests.get(f"{self.nessus_server}/tokens/{res['token']}/status", headers=self.headers, verify=False).text)
                 while status["status"] != "ready":
+                    if status["status"] == "error":
+                        log.error("Error exporting scan type " + t + ": " + status)
+                        quit()
                     sleep(0.5)
+                    log.debug(status)
                     status = json.loads(requests.get(f"{self.nessus_server}/tokens/{res['token']}/status", headers=self.headers, verify=False).text)
                 if t == "pdf":
                     t_headers = self.headers
@@ -182,8 +186,7 @@ class _Scan():
                 # use urllib to download the pdf, requests generates corrupted files
                 report_url = f"{self.nessus_server}/tokens/{res['token']}/download"
                 filename = ''.join(random.choice(string.ascii_letters) for i in range(6))
-                report_path = f"{path}/{slugify(self.metadata['settings']['name'])}_{filename}.{t}"
-
+                report_path = f"{path}/{slugify(self.metadata['settings']['name'], lowercase=False)}_{filename}.{t}"
 
                 ctx = ssl.create_default_context()
                 ctx.check_hostname = False

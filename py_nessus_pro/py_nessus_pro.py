@@ -140,7 +140,7 @@ class PyNessusPro:
         return scans
 
     def get_scan_reports(self, scan_id, path = ""):
-        return self.scans[scan_id].get_reports()
+        return self.scans[scan_id].get_reports(path)
     
     def get_status_by_name(self, name):
         res = []
@@ -149,7 +149,7 @@ class PyNessusPro:
             res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
-    def get_reports_by_name(self, name, path = ""):
+    def get_reports_by_name(self, name, path):
         res = []
         ids = self.search_scans(name)
         for id in ids:
