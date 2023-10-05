@@ -2,13 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='py_nessus_pro',
-    version='0.8.4',
+    version='0.8.5',
     packages=find_packages(),
     install_requires=[
-        'selenium',
-        'beautifulsoup4',
-        'slugify',
-        'tempfile',
+         'selenium',
+         'beautifulsoup4',
+         'python-slugify',
          'requests',
          'json',
          'datetime',
