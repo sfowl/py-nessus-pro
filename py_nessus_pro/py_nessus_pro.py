@@ -18,7 +18,7 @@ class PyNessusPro:
     policy_map = {}
     scans = []
 
-    def __init__(self, nessus_server, username, password):
+    def __init__(self, nessus_server: str, username: str, password: str):
         self.nessus_server = nessus_server if not self.nessus_server else self.nessus_server
         if not self.headers:
             self.headers = {
@@ -81,7 +81,7 @@ class PyNessusPro:
                     folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
                     self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
 
-    def new_scan(self, name = "", targets = "", folder = "", create_folder = True):
+    def new_scan(self, name: str = "", targets: str = "", folder: str = "", create_folder: bool = True):
         if folder:
             if not folder in self.folder_map and create_folder:
                self.create_folder(folder)
@@ -105,37 +105,37 @@ class PyNessusPro:
     def get_scan_ids(self):
         return range(len(self.scans))
     
-    def get_scan_metadata(self, scan_id):
+    def get_scan_metadata(self, scan_id: int):
         return self.scans[scan_id].get_metadata()
     
-    def get_scan_status(self, scan_id):
+    def get_scan_status(self, scan_id: int):
         return self.scans[scan_id].get_status()
 
-    def set_scan_name(self, scan_id, name):
+    def set_scan_name(self, scan_id: int, name: str):
         self.scans[scan_id].set_name(name)
 
-    def set_scan_description(self, scan_id, description):
+    def set_scan_description(self, scan_id: int, description: str):
         self.scans[scan_id].set_description(description)
 
-    def set_scan_folder(self, scan_id, folder):
+    def set_scan_folder(self, scan_id: int, folder: str):
         self.scans[scan_id].set_folder(folder)
 
-    def set_scan_policy(self, scan_id, policy):
+    def set_scan_policy(self, scan_id: int, policy: str):
         self.scans[scan_id].set_policy(policy)
 
-    def set_scan_target(self, scan_id, target):
+    def set_scan_target(self, scan_id: int, target: str):
         self.scans[scan_id].set_target(target)
 
-    def set_scan_launch_now(self, scan_id, launch_now):
+    def set_scan_launch_now(self, scan_id: int, launch_now: str):
         self.scans[scan_id].set_launch_now(launch_now)
 
-    def set_scan_live_results(self, scan_id, live_results):
+    def set_scan_live_results(self, scan_id: int, live_results: str):
         self.scans[scan_id].set_live_results(live_results)
 
-    def set_scan_program_scan(self, scan_id, enabled, date):
+    def set_scan_program_scan(self, scan_id: int, enabled: bool, date: str):
         self.scans[scan_id].set_program_scan(enabled, date)
 
-    def post_scan(self, scan_id):
+    def post_scan(self, scan_id: int):
         self.scans[scan_id].post()
 
     def dump_scans(self):
@@ -144,38 +144,38 @@ class PyNessusPro:
             scans.append(scan.dump())
         return scans
 
-    def get_scan_reports(self, scan_id, path = ""):
+    def get_scan_reports(self, scan_id: int, path: str = ""):
         return self.scans[scan_id].get_reports(path)
     
-    def get_status_by_name(self, name):
+    def get_status_by_name(self, name: str):
         res = []
         ids = self.search_scans(name)
         for id in ids:
             res.append({"name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
-    def get_reports_by_name(self, name, path):
+    def get_reports_by_name(self, name: str, path: str):
         res = []
         ids = self.search_scans(name)
         for id in ids:
             res.append({"id": id, "name":self.scans[id].get_name(), "path":self.scans[id].get_reports(path)})
         return res
     
-    def get_scans_before(self, before):
+    def get_scans_before(self, before: str):
         res = []
         ids = self.search_scans(before = before)
         for id in ids:
             res.append({"id": id, "name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
-    def get_scans_after(self, after):
+    def get_scans_after(self, after: str):
         res = []
         ids = self.search_scans(after = after)
         for id in ids:
             res.append({"id": id, "name":self.scans[id].get_name(), "status":self.scans[id].get_status()})
         return res
     
-    def search_scans(self, name = "", after = "", before = ""):
+    def search_scans(self, name: str = "", after: str = "", before: str = ""):
         results = []
         for i, scan in enumerate(self.scans):
             if name:
@@ -208,7 +208,7 @@ class PyNessusPro:
 
         return results
     
-    def create_folder(self, folder_name):
+    def create_folder(self, folder_name: str):
         if folder_name in self.folder_map:
             log.warn("Folder already exists")
             return self.folder_map[folder_name]
