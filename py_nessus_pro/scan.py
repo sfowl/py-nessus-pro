@@ -19,7 +19,7 @@ class _Scan():
         "pdf":"vuln_by_host;compliance_exec;remediations;",
     }
 
-    def __init__(self, nessus_server, headers, folder_map, policy_map, name = "", target = "", id = "", folder = ""):
+    def __init__(self, nessus_server, headers, folder_map, policy_map, name = "", targets = "", id = "", folder = ""):
         self.id = id
         self.metadata = json.loads('''{
             "uuid":"ab4bacd2-05f6-425c-9d79-3ba3940ad1c24e51e1f403febe40",
@@ -47,10 +47,10 @@ class _Scan():
         self.headers = headers
         self.folder_map = folder_map
         self.policy_map = policy_map
-        self.metadata["settings"]["text_targets"] = target
+        self.metadata["settings"]["text_targets"] = targets
         self.metadata["settings"]["name"] = name
         self.metadata["settings"]["folder_id"] = self.folder_map[folder] if folder in self.folder_map else 0
-        log.success("Scan object created: " + str(name) + " " + str(target))
+        log.success("Scan object created: " + str(name) + " " + str(targets))
 
     def set_name(self, name):
         self.metadata["settings"]["name"] = name

@@ -81,8 +81,11 @@ class PyNessusPro:
                     folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
                     self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
 
-    def new_scan(self, name = "", target = "", folder = 0):
-        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, target = target, folder = folder))
+    def new_scan(self, name = "", targets = "", folder = "", create_folder = True):
+        if folder:
+            if not folder in self.folder_map and create_folder:
+               self.create_folder(folder)
+        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, targets = targets, folder = folder))
         log.info("Created new scan")
         return len(self.scans) - 1
     
