@@ -2,11 +2,11 @@
 
 # PyNessusPro
 
-`py_nessus_pro` is a Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. The module uses the Nessus REST API to perform various operations, such as creating and managing scans, retrieving scan metadata and reports, and searching for scans by name or date. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
+PyNessusPro is a Python module that provides a high-level interface for interacting with a Nessus vulnerability scanner. The module uses the Nessus REST API to perform various operations, such as creating and managing scans, retrieving scan metadata and reports, and searching for scans by name or date. It provides Nessus Professional with an interface to expand the read-omly API and be able to launch scans and modify them.
 
 ## Installation
 
-To install `py_nessus_pro`, simply run:
+To install PyNessusPro, simply run:
 
 ```
 pip install py-nessus-pro
@@ -14,7 +14,7 @@ pip install py-nessus-pro
 
 ## Usage
 
-To use `py_nessus_pro`, you first need to create an instance of the `PyNessusPro` class, which represents a connection to a Nessus server. You can create an instance by providing the URL of the Nessus server, as well as your username and password:
+To use PyNessusPro, you first need to create an instance of the `PyNessusPro` class, which represents a connection to a Nessus server. You can create an instance by providing the URL of the Nessus server, as well as your username and password:
 
 ```python
 from py_nessus_pro import PyNessusPro
@@ -77,4 +77,4 @@ For more information on the available methods and their parameters, please refer
 
 ## License
 
-`py_nessus_pro` is licensed under the GNU GENERAL PUBLIC LICENSE Version 2. See the `LICENSE` file for more information.
+PyNessusPro is licensed under the GNU GENERAL PUBLIC LICENSE Version 2. See the `LICENSE` file for more information.
