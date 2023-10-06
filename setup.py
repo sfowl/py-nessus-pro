@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='py_nessus_pro',
-    version='0.8.6',
+    version='0.9.0',
     packages=find_packages(),
     install_requires=[
          'selenium',
