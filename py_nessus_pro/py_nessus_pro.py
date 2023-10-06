@@ -35,7 +35,9 @@ class PyNessusPro:
                 script_urls.append(script['src'])
             options = webdriver.ChromeOptions()
             options.add_argument('ignore-certificate-errors')
-            options.add_argument('headless')
+            options.add_argument('headless=new')
+            options.add_argument('disable-gpu')
+            options.add_argument('no-sandbox')
             options.page_load_strategy = 'eager'
             options.headless = True
             driver = webdriver.Chrome(options=options)
