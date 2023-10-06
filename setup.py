@@ -9,7 +9,6 @@ setup(
          'beautifulsoup4',
          'python-slugify',
          'requests',
-         'ssl',
          'logger',
     ],
     author='Matbe34',
