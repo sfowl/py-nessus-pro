@@ -18,7 +18,7 @@ class PyNessusPro:
     policy_map = {}
     scans = []
 
-    def __init__(self, nessus_server, username, password):
+    def __init__(self, nessus_server, username, password, log_level = "warning"):
         self.nessus_server = nessus_server if not self.nessus_server else self.nessus_server
         if not self.headers:
             self.headers = {
@@ -80,6 +80,13 @@ class PyNessusPro:
                 if scan["folder_id"] != 2:
                     folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
                     self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
+    
+        if log_level:
+            if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
+                log.set_level(log_level)
+            else:
+                log.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
+                log.error("Invalid log level, using default (warning)")
 
     def new_scan(self, name = "", targets = "", folder = "", create_folder = True):
         if folder:
