@@ -1,4 +1,4 @@
-import json, requests, re
+import json, requests, re, logging
 from datetime import datetime
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -19,6 +19,14 @@ class PyNessusPro:
     scans = []
 
     def __init__(self, nessus_server: str, username: str, password: str, log_level: str = "warning"):
+        if log_level:
+            if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
+                log.set_log_level(log_level)
+
+            else:
+                log.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
+                log.error("Invalid log level, using default (warning)")
+
         self.nessus_server = nessus_server if not self.nessus_server else self.nessus_server
         if not self.headers:
             self.headers = {
@@ -80,13 +88,6 @@ class PyNessusPro:
                 if scan["folder_id"] != 2:
                     folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
                     self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
-
-        if log_level:
-            if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
-                log.set_level(log_level)
-            else:
-                log.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
-                log.error("Invalid log level, using default (warning)")
 
     def new_scan(self, name: str = "", targets: str = "", folder: str = "", create_folder: bool = True):
         if folder:
