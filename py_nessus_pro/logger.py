@@ -2,21 +2,6 @@ import logging
 
 LOG_LEVEL = logging.WARNING
 
-def set_log_level(log_level):
-    if log_level == "debug":
-        logger.setLevel(logging.DEBUG)
-    elif log_level == "info":
-        logger.setLevel(logging.INFO)
-    elif log_level == "success":
-        logger.setLevel(logging.SUCCESS)
-    elif log_level == "warning" or log_level == "warn":
-        logger.setLevel(logging.WARNING)
-    elif log_level == "error":
-        logger.setLevel(logging.ERROR)
-    elif log_level == "critical":
-        logger.setLevel(logging.CRITICAL)
-
-
 class ColoredFormatter(logging.Formatter):
     COLORS = {
         'ERROR': '\033[91m',  # Red
@@ -51,6 +36,21 @@ class CustomLogger(logging.Logger):
     def success(self, msg, *args, **kwargs):
         if self.isEnabledFor(logging.SUCCESS):
             self._log(logging.SUCCESS, msg, args, **kwargs)
+    
+    def set_log_level(self, log_level):
+        if log_level == "debug":
+            logger.setLevel(logging.DEBUG)
+        elif log_level == "info":
+            logger.setLevel(logging.INFO)
+        elif log_level == "success":
+            logger.setLevel(logging.SUCCESS)
+        elif log_level == "warning" or log_level == "warn":
+            logger.setLevel(logging.WARNING)
+        elif log_level == "error":
+            logger.setLevel(logging.ERROR)
+        elif log_level == "critical":
+            logger.setLevel(logging.CRITICAL)
+
 
 logging.SUCCESS = 25
 logging.addLevelName(logging.SUCCESS, 'SUCCESS')
