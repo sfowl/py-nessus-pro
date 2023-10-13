@@ -60,7 +60,7 @@ class PyNessusPro:
         if len(self.folder_map) == 0:
             folders = json.loads(requests.get(f"{self.nessus_server}/folders", headers=self.headers, verify=False).text)
             if not folders["folders"]:
-                raise Exception("[!] No folders found.")
+                log.warning("No folders found.")
             for folder in folders["folders"]:
                 self.folder_map[folder["name"]] = folder["id"]
             log.info("Found %d custom folders." % (len(self.folder_map) - 2))
@@ -219,5 +219,49 @@ class PyNessusPro:
                 log.success("Folder created")
                 return self.folder_map[folder_name]
             else:
-                raise Exception("[!] Folder creation failed")
+                log.error("[!] Folder creation failed")
+
+    def import_policy(self, policy_file):
+        with open(policy_file, "r") as f:
+            headers = self.headers.copy()
+            headers["Content-Type"] = "multipart/form-data"
+            r = requests.post(f"{self.nessus_server}/file/upload", headers=headers, files={"Filedata":f}, verify=False)
+            if r.status_code == 200:
+                log.info("Policy uploaded")
+                filename = json.loads(r.text)["fileuploaded"]
+                r = requests.post(f"{self.nessus_server}/policies/import", headers=self.headers, data=f'{{"file":"{filename}"}}', verify=False)
+                if r.status_code == 200:
+                    policy_id = json.loads(r.text)["id"]
+                    policy_name = json.loads(r.text)["name"]
+                    self.policy_map[policy_name] = policy_id
+                    log.success(f"Policy imported, {policy_name}")
+                else:
+                    log.error("Policy import failed")
+            else:
+                log.error("Policy import failed")
+    
+    def import_scan(self, scan_path, folder_name = ""):
+        with open(scan_path, "r") as f:
+            headers = self.headers.copy()
+            headers["Content-Type"] = "multipart/form-data"
+            r = requests.post(f"{self.nessus_server}/file/upload", headers=headers, files={"Filedata":f}, verify=False)
+            if r.status_code == 200:
+                log.info("Scan uploaded")
+                filename = json.loads(r.text)["fileuploaded"]
+                if folder_name:
+                    if folder_name in self.folder_map:
+                        folder_id = self.folder_map[folder_name]
+                    else:
+                        log.info("Folder not found, creating it")
+                        folder_id = self.create_folder(folder_name)
+                else:
+                    folder_id = 2
+                r = requests.post(f"{self.nessus_server}/scans/import", headers=self.headers, data=f'{{"file":"{filename}", "folder_id":{folder_id}}}', verify=False)
+                if r.status_code == 200:
+                    scan_name = json.loads(r.text)["name"]
+                    log.success(f"Scan imported, {scan_name}")
+                else:
+                    log.error("Scan import failed")
+            else:
+                log.error("Scan import failed")
 
