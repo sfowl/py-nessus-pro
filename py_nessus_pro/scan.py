@@ -19,7 +19,7 @@ class _Scan():
         "pdf":"vuln_by_host;compliance_exec;remediations;",
     }
 
-    def __init__(self, nessus_server, headers, folder_map, policy_map, name = "", targets = "", id = "", folder = ""):
+    def __init__(self, nessus_server: str, headers: dict, folder_map: dict, policy_map: dict, name: str = "", targets: str = "", id: str = "", folder: str = ""):
         self.id = id
         self.metadata = json.loads('''{
             "uuid":"ab4bacd2-05f6-425c-9d79-3ba3940ad1c24e51e1f403febe40",
@@ -52,47 +52,47 @@ class _Scan():
         self.metadata["settings"]["folder_id"] = self.folder_map[folder] if folder in self.folder_map else 0
         log.success("Scan object created: " + str(name) + " " + str(targets))
 
-    def set_name(self, name):
+    def set_name(self, name: str):
         self.metadata["settings"]["name"] = name
         log.debug("Name updated: " + name)
 
-    def set_description(self, description):
+    def set_description(self, description: str):
         self.metadata["settings"]["description"] = description
         log.debug("Description updated: " + description)
 
-    def set_target(self, target):
+    def set_target(self, target: str):
         self.metadata["settings"]["text_targets"] = target
         log.debug("Target updated: " + target)
 
-    def set_folder(self, folder):
+    def set_folder(self, folder: str):
         if folder in self.folder_map:
             self.metadata["settings"]["folder_id"] = self.folder_map[folder]
         else:
             raise Exception("[!] Invalid folder name: " + folder)
         log.debug("Folder updated: " + folder)
         
-    def set_policy(self, policy):
+    def set_policy(self, policy: str):
         if policy in self.policy_map:
             self.metadata["settings"]["policy_id"] = self.policy_map[policy]
         else:
             raise Exception("[!] Invalid policy name: " + policy)
         log.debug("Policy updated: " + policy)
     
-    def set_launch_now(self, launch):
+    def set_launch_now(self, launch: bool):
         if launch in [True, False]:
             self.metadata["settings"]["launch_now"] = launch
         else:
             raise Exception("[!] Invalid launch_now value: %s\n Value must be True or False", launch)
         log.debug("Launch now: " + str(launch))
         
-    def set_live_results(self, live_results):
+    def set_live_results(self, live_results: bool):
         if live_results in [True, False]:
             self.metadata["settings"]["live_results"] = live_results
         else:
             raise Exception("[!] Invalid live_results value: %s\n Value must be True or False", live_results)
         log.debug("Live results: " + str(live_results))
     
-    def set_program_scan(self, enabled, date):
+    def set_program_scan(self, enabled: bool, date: str):
         if enabled in [True, False]:
             self.metadata["settings"]["enabled"] = enabled
         else:
@@ -151,7 +151,7 @@ class _Scan():
             "metadata":self.metadata,
         }
 
-    def get_reports(self, path):
+    def get_reports(self, path: str):
         if not self.id:
             log.error("Scan not posted yet")
             return
