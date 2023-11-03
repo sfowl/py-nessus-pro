@@ -134,7 +134,7 @@ class PyNessusPro:
     def set_scan_target(self, scan_id: int, target: str):
         self.scans[scan_id].set_target(target)
 
-    def set_scan_launch_now(self, scan_id: int, launch_now: str):
+    def set_scan_launch_now(self, scan_id: int, launch_now: bool):
         self.scans[scan_id].set_launch_now(launch_now)
 
     def set_scan_live_results(self, scan_id: int, live_results: str):
