@@ -10,7 +10,14 @@ setup(
          'python-slugify',
          'requests',
          'logger',
+         'typer',
+         'typing',
     ],
+    entry_points={
+        'console_scripts': [
+            'py-nessus-pro = cli:app',
+        ],
+    },
     author='Matbe34',
     description='Python library for managing Nessus Professional.',
     url='https://github.com/Matbe34/py-nessus-pro',
