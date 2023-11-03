@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='py_nessus_pro',
-    version='1.0.0',
+    version='1.0.1',
     packages=find_packages(),
     install_requires=[
          'selenium',
@@ -15,7 +15,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'py-nessus-pro = cli:app',
+            'py-nessus-pro=cli:app',
         ],
     },
     author='Matbe34',
