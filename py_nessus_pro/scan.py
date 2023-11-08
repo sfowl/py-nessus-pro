@@ -1,4 +1,4 @@
-import json, requests, random, string, urllib.request, ssl
+import json, requests, random, string
 from slugify import slugify
 from datetime import datetime
 from time import sleep
@@ -164,7 +164,9 @@ class _Scan():
             data["format"] = t
 
             if t in ["html", "pdf"]:
-                data = json.loads('{"format":"html", "chapters": "vuln_by_host;compliance_exec;remediations;"}')                
+                data = json.loads('{"format":"", "chapters": "vuln_by_plugin"}')
+                data["format"] = t
+                # data = json.loads('{"format":"html", "chapters": "vuln_by_host;compliance_exec;remediations;"}')                
 
             res = json.loads(requests.post(f"{self.nessus_server}/scans/{self.id}/export", headers=self.headers, json = data, verify=False).text)
             if "token" in res:
@@ -183,17 +185,15 @@ class _Scan():
                     t_headers["Connection"] = "keep-alive"
                     t_headers["Accept"] = "*/*"
                 else: t_headers = self.headers
-                # use urllib to download the pdf, requests generates corrupted files
+
                 report_url = f"{self.nessus_server}/tokens/{res['token']}/download"
                 filename = ''.join(random.choice(string.ascii_letters) for i in range(6))
                 report_path = f"{path}/{slugify(self.metadata['settings']['name'], lowercase=False)}_{filename}.{t}"
 
-                ctx = ssl.create_default_context()
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
-                with urllib.request.urlopen(report_url, context=ctx) as f:
-                    with open(report_path, "wb") as r:
-                        r.write(f.read())
+                r = requests.get(report_url, headers=t_headers, verify=False)
+                if r.status_code == 200:
+                    with open(report_path, "wb") as f:
+                        f.write(r.content)
                         log.debug("Report downloaded: " + report_path)
             else:
                 log.error("Error exporting scan: " + res["error"])
