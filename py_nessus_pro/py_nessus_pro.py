@@ -75,7 +75,7 @@ class PyNessusPro:
 
         if len(self.policy_map) == 0:
             policies = json.loads(requests.get(f"{self.nessus_server}/policies", headers=self.headers, verify=False).text)
-            if policies["policies"]:
+            if policies.get("policies", None):
                 for policy in policies["policies"]:
                     self.policy_map[policy["name"]] = policy["id"]
                 log.info("Found %d custom policies." % len(self.policy_map))
@@ -84,10 +84,11 @@ class PyNessusPro:
 
         if not self.scans:
             scans_list = json.loads(requests.get(f"{self.nessus_server}/scans", headers=self.headers, verify=False).text)
-            for scan in scans_list["scans"]:
-                if scan["folder_id"] != 2:
-                    folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
-                    self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
+            if scans_list.get("scans", None):
+                for scan in scans_list["scans"]:
+                    if scan["folder_id"] != 2:
+                        folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
+                        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
 
     def new_scan(self, name: str = "", targets: str = "", folder: str = "", create_folder: bool = True):
         if folder:
