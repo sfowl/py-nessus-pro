@@ -233,7 +233,7 @@ class PyNessusPro:
     def import_policy(self, policy_file):
         with open(policy_file, "r") as f:
             headers = self.headers.copy()
-            headers["Content-Type"] = "multipart/form-data"
+            headers.pop("Content-Type")
             r = requests.post(f"{self.nessus_server}/file/upload", headers=headers, files={"Filedata":f}, verify=False)
             if r.status_code == 200:
                 log.info("Policy uploaded")
