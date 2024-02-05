@@ -74,5 +74,22 @@ def launch_scan(
     else:
         typer.echo("[!] No targets provided", color=typer.colors.RED)
 
+@app.command()
+def upload_policy(
+    server_ip: Annotated[str, typer.Option(..., "--server-ip", "-s", help="Nessus server ip")],
+    username: Annotated[str, typer.Option(..., "--username", "-u", help="Nessus username")],
+    verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Verbose output"),
+    policy_file: Optional[bool] = typer.Option(None, "--file", "-f", help="Path to the policy file to upload")
+):
+    """Upload a policy to nessus server"""
+    nessus = nessus_login(server_ip, username, verbose)
+    if policy_file:
+        if os.path.exists(policy_file):
+            typer.echo(f"Uploading policy file {policy_file}")
+            nessus.import_policy(policy_file)
+            typer.echo(f"Policy file {policy_file} uploaded", color=typer.colors.GREEN)
+        else:
+            typer.echo(f"[!] Policy file {policy_file} does not exist", color=typer.colors.RED)
+
 if __name__ == "__main__":
     app()
