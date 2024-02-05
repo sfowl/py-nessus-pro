@@ -78,8 +78,8 @@ def launch_scan(
 def upload_policy(
     server_ip: Annotated[str, typer.Option(..., "--server-ip", "-s", help="Nessus server ip")],
     username: Annotated[str, typer.Option(..., "--username", "-u", help="Nessus username")],
-    verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Verbose output"),
-    policy_file: Optional[bool] = typer.Option(None, "--file", "-f", help="Path to the policy file to upload")
+    policy_file: Annotated[str, typer.Option(..., "--file", "-f", help="Path to the policy file to upload")],
+    verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Verbose output")
 ):
     """Upload a policy to nessus server"""
     nessus = nessus_login(server_ip, username, verbose)
