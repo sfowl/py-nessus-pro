@@ -91,5 +91,16 @@ def upload_policy(
         else:
             typer.echo(f"[!] Policy file {policy_file} does not exist", color=typer.colors.RED)
 
+@app.command()
+def get_scan_status(
+    server_ip: Annotated[str, typer.Option(..., "--server-ip", "-s", help="Nessus server ip")],
+    username: Annotated[str, typer.Option(..., "--username", "-u", help="Nessus username")],
+    name: Optional[str] = typer.Option("PyNessus AutoScan", "--name", "-n", help="Name of the scan/s to get status from"),
+    verbose: Optional[bool] = typer.Option(False, "--verbose", "-v", help="Verbose output")
+):
+    """Get scan status by name"""
+    nessus = nessus_login(server_ip, username, verbose)
+    typer.echo(nessus.get_status_by_name(name))
+
 if __name__ == "__main__":
     app()
