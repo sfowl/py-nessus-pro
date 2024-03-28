@@ -16,7 +16,8 @@ class _Scan():
         "nessus":"",
         "csv":"",
         "html":"vuln_by_host;compliance_exec;remediations;",
-        "pdf":"vuln_by_host;compliance_exec;remediations;",
+        # Disable pdf export as some Nessus installations do not support it
+        # "pdf":"vuln_by_host;compliance_exec;remediations;",
     }
 
     def __init__(self, nessus_server: str, headers: dict, folder_map: dict, policy_map: dict, name: str = "", targets: str = "", id: str = "", folder: str = ""):
@@ -126,11 +127,14 @@ class _Scan():
         if self.id:
             x = json.loads(requests.get(f"{self.nessus_server}/scans/{self.id}", headers=self.headers, verify=False).text)
             res = {}
-            res["status"] = x["info"]["status"]
-            res["scan_start"] = x["info"]["scan_start"] if res["status"] != "empty" else None
-            res["scan_end"] = x["info"]["scan_end"] if res["status"] == "completed" else None 
-            res["name"] = x["info"]["name"]
-            return res
+            if x.get("info", None):
+                res["status"] = x["info"]["status"]
+                res["scan_start"] = x["info"].get("scan_start", None)
+                res["scan_end"] = x["info"].get("scan_end", None )
+                res["name"] = x["info"]["name"]
+                return res
+            else:
+                return "Error retrieving scan status, check authorization issues or retry request."
         else:
             return "Scan not posted yet"
     
@@ -155,8 +159,8 @@ class _Scan():
         if not self.id:
             log.error("Scan not posted yet")
             return
-        if self.get_status()["status"] != "completed":
-            log.error("Scan not completed yet")
+        if self.get_status()["status"] not in ["completed", "canceled", "imported"]:
+            log.error("Scan not finished yet")
             return
 
         for t in self.export_types:
@@ -166,7 +170,6 @@ class _Scan():
             if t in ["html", "pdf"]:
                 data = json.loads('{"format":"", "chapters": "vuln_by_plugin"}')
                 data["format"] = t
-                # data = json.loads('{"format":"html", "chapters": "vuln_by_host;compliance_exec;remediations;"}')                
 
             res = json.loads(requests.post(f"{self.nessus_server}/scans/{self.id}/export", headers=self.headers, json = data, verify=False).text)
             if "token" in res:
