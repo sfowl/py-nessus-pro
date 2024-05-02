@@ -67,7 +67,7 @@ class PyNessusPro:
         
         if len(self.folder_map) == 0:
             folders = json.loads(requests.get(f"{self.nessus_server}/folders", headers=self.headers, verify=False).text)
-            if not folders["folders"]:
+            if not folders.get("folders", None):
                 log.warning("No folders found.")
             for folder in folders["folders"]:
                 self.folder_map[folder["name"]] = folder["id"]
