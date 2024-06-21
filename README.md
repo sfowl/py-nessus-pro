@@ -1,4 +1,4 @@
-[![ PyPi ](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release)](https://github.com/Matbe34/py-nessus-pro/actions/workflows/pynessus-publish.yml)
+[![ PyPi ](https://github.com/Matbe34/py-nessus/actions/workflows/pynessus-publish.yml/badge.svg?event=release)](https://pypi.org/project/py-nessus-pro/)
 
 # PyNessusPro
 
