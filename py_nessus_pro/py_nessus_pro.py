@@ -2,8 +2,8 @@ import json, requests, re, logging
 from datetime import datetime
 from selenium import webdriver
 from bs4 import BeautifulSoup
+from loguru import logger
 
-from .logger import logger as log
 from py_nessus_pro.scan import _Scan
 
 # file deepcode ignore SSLVerificationBypass: Nessus self-signed certificate
@@ -21,11 +21,11 @@ class PyNessusPro:
     def __init__(self, nessus_server: str, username: str, password: str, log_level: str = "warning"):
         if log_level:
             if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
-                log.set_log_level(log_level)
+                logger.set_log_level(log_level)
 
             else:
-                log.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
-                log.error("Invalid log level, using default (warning)")
+                logger.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
+                logger.error("Invalid log level, using default (warning)")
 
         self.nessus_server = nessus_server if not self.nessus_server else self.nessus_server
         if not self.headers:
@@ -61,26 +61,26 @@ class PyNessusPro:
             if r.status_code == 200:
                 self.headers["X-Cookie"] = "token=" + json.loads(r.text)["token"]
                 self.headers["X-API-Token"] = token
-                log.info("Successfully logged in")
+                logger.info("Successfully logged in")
             else:
                 raise Exception("[!] Login failed")
         
         if len(self.folder_map) == 0:
             folders = json.loads(requests.get(f"{self.nessus_server}/folders", headers=self.headers, verify=False).text)
             if not folders.get("folders", None):
-                log.warning("No folders found.")
+                logger.warning("No folders found.")
             for folder in folders["folders"]:
                 self.folder_map[folder["name"]] = folder["id"]
-            log.info("Found %d custom folders." % (len(self.folder_map) - 2))
+            logger.info("Found %d custom folders." % (len(self.folder_map) - 2))
 
         if len(self.policy_map) == 0:
             policies = json.loads(requests.get(f"{self.nessus_server}/policies", headers=self.headers, verify=False).text)
             if policies.get("policies", None):
                 for policy in policies["policies"]:
                     self.policy_map[policy["name"]] = policy["id"]
-                log.info("Found %d custom policies." % len(self.policy_map))
+                logger.info("Found %d custom policies." % len(self.policy_map))
             else:
-                log.info("No policies found")
+                logger.info("No policies found")
 
         if not self.scans:
             scans_list = json.loads(requests.get(f"{self.nessus_server}/scans", headers=self.headers, verify=False).text)
@@ -95,7 +95,7 @@ class PyNessusPro:
             if not folder in self.folder_map and create_folder:
                self.create_folder(folder)
         self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, name = name, targets = targets, folder = folder))
-        log.info("Created new scan")
+        logger.info("Created new scan")
         return len(self.scans) - 1
     
     def list_scans(self):
@@ -219,16 +219,16 @@ class PyNessusPro:
     
     def create_folder(self, folder_name: str):
         if folder_name in self.folder_map:
-            log.warn("Folder already exists")
+            logger.warn("Folder already exists")
             return self.folder_map[folder_name]
         else:
             r = requests.post(f"{self.nessus_server}/folders", headers=self.headers, data=f'{{"name":"{folder_name}"}}', verify=False)
             if r.status_code == 200:
                 self.folder_map[folder_name] = json.loads(r.text)["id"]
-                log.success("Folder created")
+                logger.success("Folder created")
                 return self.folder_map[folder_name]
             else:
-                log.error("[!] Folder creation failed")
+                logger.error("[!] Folder creation failed")
 
     def import_policy(self, policy_file):
         with open(policy_file, "r") as f:
@@ -236,18 +236,18 @@ class PyNessusPro:
             headers.pop("Content-Type")
             r = requests.post(f"{self.nessus_server}/file/upload", headers=headers, files={"Filedata":f}, verify=False)
             if r.status_code == 200:
-                log.info("Policy uploaded")
+                logger.info("Policy uploaded")
                 filename = json.loads(r.text)["fileuploaded"]
                 r = requests.post(f"{self.nessus_server}/policies/import", headers=self.headers, data=f'{{"file":"{filename}"}}', verify=False)
                 if r.status_code == 200:
                     policy_id = json.loads(r.text)["id"]
                     policy_name = json.loads(r.text)["name"]
                     self.policy_map[policy_name] = policy_id
-                    log.success(f"Policy imported, {policy_name}")
+                    logger.success(f"Policy imported, {policy_name}")
                 else:
-                    log.error("Policy import failed")
+                    logger.error("Policy import failed")
             else:
-                log.error("Policy import failed")
+                logger.error("Policy import failed")
     
     def import_scan(self, scan_path, folder_name = ""):
         with open(scan_path, "r") as f:
@@ -255,22 +255,22 @@ class PyNessusPro:
             headers["Content-Type"] = "multipart/form-data"
             r = requests.post(f"{self.nessus_server}/file/upload", headers=headers, files={"Filedata":f}, verify=False)
             if r.status_code == 200:
-                log.info("Scan uploaded")
+                logger.info("Scan uploaded")
                 filename = json.loads(r.text)["fileuploaded"]
                 if folder_name:
                     if folder_name in self.folder_map:
                         folder_id = self.folder_map[folder_name]
                     else:
-                        log.info("Folder not found, creating it")
+                        logger.info("Folder not found, creating it")
                         folder_id = self.create_folder(folder_name)
                 else:
                     folder_id = 2
                 r = requests.post(f"{self.nessus_server}/scans/import", headers=self.headers, data=f'{{"file":"{filename}", "folder_id":{folder_id}}}', verify=False)
                 if r.status_code == 200:
                     scan_name = json.loads(r.text)["name"]
-                    log.success(f"Scan imported, {scan_name}")
+                    logger.success(f"Scan imported, {scan_name}")
                 else:
-                    log.error("Scan import failed")
+                    logger.error("Scan import failed")
             else:
-                log.error("Scan import failed")
+                logger.error("Scan import failed")
 

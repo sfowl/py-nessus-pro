@@ -2,8 +2,8 @@ import json, requests, random, string
 from slugify import slugify
 from datetime import datetime
 from time import sleep
+from loguru import logger
 
-from .logger import logger as log
 
 # file deepcode ignore SSLVerificationBypass: Nessus self-signed certificate
 
@@ -51,47 +51,47 @@ class _Scan():
         self.metadata["settings"]["text_targets"] = targets
         self.metadata["settings"]["name"] = name
         self.metadata["settings"]["folder_id"] = self.folder_map[folder] if folder in self.folder_map else 0
-        log.success("Scan object created: " + str(name) + " " + str(targets))
+        logger.success("Scan object created: " + str(name) + " " + str(targets))
 
     def set_name(self, name: str):
         self.metadata["settings"]["name"] = name
-        log.debug("Name updated: " + name)
+        logger.debug("Name updated: " + name)
 
     def set_description(self, description: str):
         self.metadata["settings"]["description"] = description
-        log.debug("Description updated: " + description)
+        logger.debug("Description updated: " + description)
 
     def set_target(self, target: str):
         self.metadata["settings"]["text_targets"] = target
-        log.debug("Target updated: " + target)
+        logger.debug("Target updated: " + target)
 
     def set_folder(self, folder: str):
         if folder in self.folder_map:
             self.metadata["settings"]["folder_id"] = self.folder_map[folder]
         else:
             raise Exception("[!] Invalid folder name: " + folder)
-        log.debug("Folder updated: " + folder)
+        logger.debug("Folder updated: " + folder)
         
     def set_policy(self, policy: str):
         if policy in self.policy_map:
             self.metadata["settings"]["policy_id"] = self.policy_map[policy]
         else:
             raise Exception("[!] Invalid policy name: " + policy)
-        log.debug("Policy updated: " + policy)
+        logger.debug("Policy updated: " + policy)
     
     def set_launch_now(self, launch: bool):
         if launch in [True, False]:
             self.metadata["settings"]["launch_now"] = launch
         else:
             raise Exception("[!] Invalid launch_now value: %s\n Value must be True or False", launch)
-        log.debug("Launch now: " + str(launch))
+        logger.debug("Launch now: " + str(launch))
         
     def set_live_results(self, live_results: bool):
         if live_results in [True, False]:
             self.metadata["settings"]["live_results"] = live_results
         else:
             raise Exception("[!] Invalid live_results value: %s\n Value must be True or False", live_results)
-        log.debug("Live results: " + str(live_results))
+        logger.debug("Live results: " + str(live_results))
     
     def set_program_scan(self, enabled: bool, date: str):
         if enabled in [True, False]:
@@ -103,7 +103,7 @@ class _Scan():
             self.metadata["settings"]["starttime"] = date
         else:
             raise Exception("[!] Invalid date format: %s\n Format must be YYYYMMDDTHHMMSS, example: 20231001T170000", date)
-        log.debug("Program scan: " + str(enabled) + " " + date)
+        logger.debug("Program scan: " + str(enabled) + " " + date)
         
     def get_name(self):
         return self.metadata["settings"]["name"]
@@ -143,9 +143,9 @@ class _Scan():
             raise Exception("[!] No targets provided")
         x = json.loads(requests.post(f"{self.nessus_server}/scans", headers=self.headers, json = self.metadata, verify=False).text)
         if self.metadata["settings"]["launch_now"]:
-            log.info("Scan launched: " + str(x["scan"]["id"]) + " (" + self.metadata["settings"]["name"] + ")")
+            logger.info("Scan launched: " + str(x["scan"]["id"]) + " (" + self.metadata["settings"]["name"] + ")")
         else:
-            log.info("Scan saved: " + str(x["scan"]["id"]) + " (" + self.metadata["settings"]["name"] + ")")
+            logger.info("Scan saved: " + str(x["scan"]["id"]) + " (" + self.metadata["settings"]["name"] + ")")
         self.id = x["scan"]["id"]
 
     def dump(self):
@@ -157,10 +157,10 @@ class _Scan():
 
     def get_reports(self, path: str):
         if not self.id:
-            log.error("Scan not posted yet")
+            logger.error("Scan not posted yet")
             return
         if self.get_status()["status"] not in ["completed", "canceled", "imported"]:
-            log.error("Scan not finished yet")
+            logger.error("Scan not finished yet")
             return
 
         for t in self.export_types:
@@ -173,14 +173,14 @@ class _Scan():
 
             res = json.loads(requests.post(f"{self.nessus_server}/scans/{self.id}/export", headers=self.headers, json = data, verify=False).text)
             if "token" in res:
-                log.debug("Export in progress: " + res["token"])
+                logger.debug("Export in progress: " + res["token"])
                 status = json.loads(requests.get(f"{self.nessus_server}/tokens/{res['token']}/status", headers=self.headers, verify=False).text)
                 while status["status"] != "ready":
                     if status["status"] == "error":
-                        log.error("Error exporting scan type " + t + ": " + status)
+                        logger.error("Error exporting scan type " + t + ": " + status)
                         quit()
                     sleep(0.5)
-                    log.debug(status)
+                    logger.debug(status)
                     status = json.loads(requests.get(f"{self.nessus_server}/tokens/{res['token']}/status", headers=self.headers, verify=False).text)
                 if t == "pdf":
                     t_headers = self.headers
@@ -197,10 +197,10 @@ class _Scan():
                 if r.status_code == 200:
                     with open(report_path, "wb") as f:
                         f.write(r.content)
-                        log.debug("Report downloaded: " + report_path)
+                        logger.debug("Report downloaded: " + report_path)
             else:
-                log.error("Error exporting scan: " + res["error"])
+                logger.error("Error exporting scan: " + res["error"])
                 raise Exception("[!] Error exporting scan: " + res["error"])
         
-        log.success("Reports exported to " + path)
+        logger.success("Reports exported to " + path)
         return path
