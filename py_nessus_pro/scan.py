@@ -134,9 +134,16 @@ class _Scan():
                 res["name"] = x["info"]["name"]
                 return res
             else:
-                return "Error retrieving scan status, check authorization issues or retry request."
+                logger.error("Error retrieving scan status, check authorization issues or retry request.")
+                return {}
         else:
-            return "Scan not posted yet"
+            logger.error("Scan not posted yet")
+            return {
+                "status":"scan not posted yet",
+                "scan_start":None,
+                "scan_end":None,
+                "name":self.metadata["settings"]["name"]
+            }
     
     def post(self):
         if not self.metadata["settings"]["text_targets"]:
@@ -200,7 +207,7 @@ class _Scan():
                         logger.debug("Report downloaded: " + report_path)
             else:
                 logger.error("Error exporting scan: " + res["error"])
-                raise Exception("[!] Error exporting scan: " + res["error"])
+                return None
         
         logger.success("Reports exported to " + path)
         return path
