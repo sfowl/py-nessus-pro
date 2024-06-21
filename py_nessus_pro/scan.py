@@ -159,7 +159,7 @@ class _Scan():
         if not self.id:
             logger.error("Scan not posted yet")
             return
-        if self.get_status()["status"] not in ["completed", "canceled", "imported"]:
+        if self.get_status()["status"] not in ["completed", "canceled", "imported", "aborted"]:
             logger.error("Scan not finished yet")
             return
 
