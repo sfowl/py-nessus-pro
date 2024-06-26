@@ -1,4 +1,4 @@
-import json, requests, re, logging
+import json, requests, re, sys
 from datetime import datetime
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -21,7 +21,8 @@ class PyNessusPro:
     def __init__(self, nessus_server: str, username: str, password: str, log_level: str = "warning"):
         if log_level:
             if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
-                logger.set_log_level(log_level)
+                logger.remove()
+                logger.add(sys.stderr, level = log_level.upper())
 
             else:
                 logger.info("Invalid log level. log_level must be one of the following: [debug, info, success, warning, warn, error, critical]")
