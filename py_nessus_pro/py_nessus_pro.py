@@ -1,7 +1,6 @@
 import json, requests, re, sys
+import typing
 from datetime import datetime
-from selenium import webdriver
-from bs4 import BeautifulSoup
 from loguru import logger
 
 from py_nessus_pro.scan import _Scan
@@ -18,7 +17,7 @@ class PyNessusPro:
     policy_map = {}
     scans = []
 
-    def __init__(self, nessus_server: str, username: str, password: str, log_level: str = "warning"):
+    def __init__(self, nessus_server: str, username: str, password: str, auth_with_selenium: bool = False, log_level: str = "warning"):
         if log_level:
             if log_level in ["debug", "info", "success", "warning", "warn", "error", "critical"]:
                 logger.remove()
@@ -35,37 +34,13 @@ class PyNessusPro:
                 "User-Agent":"Mozilla/5.0 Gecko/20100101 Firefox/114.0"
             }
 
-            r = requests.get(self.nessus_server, headers=self.headers, verify=False)
-            html = r.text
-            
-            soup = BeautifulSoup(html, 'html.parser')
-            script_urls = []
-            for script in soup.find_all('script', src=True):
-                script_urls.append(script['src'])
-            options = webdriver.ChromeOptions()
-            options.add_argument('ignore-certificate-errors')
-            options.add_argument('headless=new')
-            options.add_argument('disable-gpu')
-            options.add_argument('no-sandbox')
-            options.page_load_strategy = 'eager'
-            options.headless = True
-            driver = webdriver.Chrome(options=options)
-            driver.get(self.nessus_server)
-            for script_url in script_urls:
-                driver.execute_script(f'var xhr = new XMLHttpRequest(); xhr.open("GET", "{script_url}", false); xhr.send(null); eval(xhr.responseText);')
-                token = driver.execute_script('return _Utils.getApiToken();')
-                if token:
-                    break
-            driver.quit()
-            
-            r = requests.post(f"{self.nessus_server}/session", headers=self.headers, data=f'{{"username":"{username}","password":"{password}"}}', verify=False)
-            if r.status_code == 200:
-                self.headers["X-Cookie"] = "token=" + json.loads(r.text)["token"]
-                self.headers["X-API-Token"] = token
-                logger.info("Successfully logged in")
-            else:
-                raise Exception("[!] Login failed")
-        
+        if auth_with_selenium:
+            # Requires local chrome and chromedriver, if not available they will be installed
+            # This auth method is more reliable though heavyweight, and can be slow on first run
+            self._authenticate_with_selenium(username, password)
+        else:
+            self._authenticate(username, password)
+
         if len(self.folder_map) == 0:
             folders = json.loads(requests.get(f"{self.nessus_server}/folders", headers=self.headers, verify=False).text)
             if not folders.get("folders", None):
@@ -89,7 +64,89 @@ class PyNessusPro:
                 for scan in scans_list["scans"]:
                     if scan["folder_id"] != 2:
                         folder = next((key for key, value in self.folder_map.items() if value == scan["folder_id"]), None)
-                        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id = scan["id"], name = scan["name"], folder = folder))
+                        self.scans.append(_Scan(self.nessus_server, self.headers, self.folder_map, self.policy_map, id=scan["id"], name=scan["name"], folder=folder))
+
+    def _get_api_token(self) -> typing.Optional[str]:
+        url = self.nessus_server + "/nessus6.js"
+        req = self._session.get(url, verify=False)
+        # regular expression to find UUID used for api key
+        token_regex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+        match = re.search(token_regex, req.text)
+        if match:
+            api_token = match.group()
+        else:
+            logger.error(f"Unable to get token in response from {url}")
+            return None
+
+        return api_token
+
+    def _get_cookie_token(self, username: str, password: str) -> str:
+        data = {"username": username, "password": password}
+        url = self.nessus_server + "/session"
+        logger.info("POST")
+        req = self._session.post(url, data, verify=False)
+        logger.info("POST W")
+        cookie_token = req.json().get("token")
+        return cookie_token
+
+    def _authenticate(self, username: str, password: str):
+        logger.debug("Authenticating without selenium")
+        self._session = requests.Session()
+        self._session.verify = False
+        cookie_token = self._get_cookie_token(username, password)
+        self.headers["X-Cookie"] = f"token={cookie_token}"
+        api_token = self._get_api_token()
+        if api_token:
+            self.headers["X-API-Token"] = api_token
+        logger.info("Successfully logged in")
+
+    def _authenticate_with_selenium(self, username: str, password: str):
+        try:
+            from selenium import webdriver
+            from bs4 import BeautifulSoup
+        except ImportError as e:
+            logger.error(
+                f"Failed to import {e}. Install or use auth_with_selenium=False"
+            )
+            sys.exit(1)
+        logger.debug("Authenticating with selenium")
+        r = requests.get(self.nessus_server, headers=self.headers, verify=False)
+        html = r.text
+
+        soup = BeautifulSoup(html, "html.parser")
+        script_urls = []
+        for script in soup.find_all("script", src=True):
+            script_urls.append(script["src"])
+        options = webdriver.ChromeOptions()
+        options.add_argument("ignore-certificate-errors")
+        options.add_argument("headless=new")
+        options.add_argument("disable-gpu")
+        options.add_argument("no-sandbox")
+        options.page_load_strategy = "eager"
+        options.headless = True
+        driver = webdriver.Chrome(options=options)
+        driver.get(self.nessus_server)
+        for script_url in script_urls:
+            driver.execute_script(
+                f'var xhr = new XMLHttpRequest(); xhr.open("GET", "{script_url}", false); xhr.send(null); eval(xhr.responseText);'
+            )
+            token = driver.execute_script("return _Utils.getApiToken();")
+            if token:
+                break
+        driver.quit()
+
+        r = requests.post(
+            f"{self.nessus_server}/session",
+            headers=self.headers,
+            data=f'{{"username":"{username}","password":"{password}"}}',
+            verify=False,
+        )
+        if r.status_code == 200:
+            self.headers["X-Cookie"] = "token=" + json.loads(r.text)["token"]
+            self.headers["X-API-Token"] = token
+            logger.info("Successfully logged in")
+        else:
+            raise Exception("[!] Login failed")
 
     def new_scan(self, name: str = "", targets: str = "", folder: str = "", create_folder: bool = True):
         if folder:

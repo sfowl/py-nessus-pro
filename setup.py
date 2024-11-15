@@ -5,14 +5,18 @@ setup(
     version='1.2.5',
     packages=find_packages(),
     install_requires=[
-         'selenium',
-         'beautifulsoup4',
-         'python-slugify',
-         'requests',
-         'loguru',
-         'typer',
-         'typing',
+        "python-slugify",
+        "requests",
+        "loguru",
+        "typer",
+        "typing",
     ],
+    extras_requires={
+        "auth_with_selenium": [
+            "selenium",
+            "beautifulsoup4",
+        ]
+    },
     entry_points={
         'console_scripts': [
             'py-nessus-pro=py_nessus_pro.py_nessus_pro_cli:app',
