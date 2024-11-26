@@ -83,10 +83,11 @@ class PyNessusPro:
     def _get_cookie_token(self, username: str, password: str) -> str:
         data = {"username": username, "password": password}
         url = self.nessus_server + "/session"
-        logger.info("POST")
         req = self._session.post(url, data, verify=False)
-        logger.info("POST W")
+        if not req.ok:
+            logger.error(f"Failed to get cookie token: {req.status_code} {req.content}")
         cookie_token = req.json().get("token")
+
         return cookie_token
 
     def _authenticate(self, username: str, password: str):
@@ -94,11 +95,18 @@ class PyNessusPro:
         self._session = requests.Session()
         self._session.verify = False
         cookie_token = self._get_cookie_token(username, password)
-        self.headers["X-Cookie"] = f"token={cookie_token}"
-        api_token = self._get_api_token()
-        if api_token:
-            self.headers["X-API-Token"] = api_token
-        logger.info("Successfully logged in")
+        api_token = None
+        if cookie_token:
+            logger.debug("obtained cookie")
+            self.headers["X-Cookie"] = f"token={cookie_token}"
+            api_token = self._get_api_token()
+            if api_token:
+                logger.debug("obtained API token")
+                self.headers["X-API-Token"] = api_token
+        if cookie_token and api_token:
+            logger.info("Successfully logged in")
+        else:
+            raise Exception("[!] Login failed")
 
     def _authenticate_with_selenium(self, username: str, password: str):
         try:
