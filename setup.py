@@ -9,7 +9,6 @@ setup(
         "requests",
         "loguru",
         "typer",
-        "typing",
     ],
     extras_requires={
         "auth_with_selenium": [
